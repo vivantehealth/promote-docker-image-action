@@ -1,19 +1,75 @@
 name: 'The named action'
 description: "Does a useful thing"
 inputs:
-  github_token:
-    description: GitHub token to use
+  environment:
     required: true
-outputs:
-  a_value:
-    description: A value that may be useful to another step
-    value: steps.date.outputs.date    
+    type: string
+  image_name:
+    description: "Name of the docker image. Image will be available in the registry at a location such as 'us-docker.pkg.dev/build-artifacts-tools-b6f1/<repo-name>/<image_name>:<git_sha>'."
+    type: string
+    required: false
+    default: image
+  base64_workload_identity_provider:
+    type: string
+    required: true
+  base64_gcp_service_account:
+    type: string
+    required: true
+  base64_docker_registry:
+    type: string
+    required: true
+
 runs:
   using: "composite"
   steps:
-    - name: Get current time
-      id: date
+    - name: Checkout
+      uses: actions/checkout@master
+    - name: Set up docker image cache
+      uses: actions/cache@v2
+      with:
+        path: image.tar
+        key: image-${{ github.sha }}
+    - name: Set up gcloud
+      uses: vivantehealth/gcloud-workload-identity-action@v2
+      with:
+        base64_workload_identity_provider: ${{ inputs.BASE64_WORKLOAD_IDENTITY_PROVIDER }}
+        base64_gcp_service_account: ${{ inputs.BASE64_GCP_SERVICE_ACCOUNT }}
+    - name: Parse docker registry/repo
       shell: bash
       run: |
-        time=$(date)
-        echo "::set-output name=time::$(echo $time)"
+        repo=$(echo -n ${{ inputs.BASE64_DOCKER_REGISTRY }} | base64 -d)
+        echo "DOCKER_REPO=$repo" >> $GITHUB_ENV
+        echo "DOCKER_REGISTRY=$(echo -n ${DOCKER_REPO} | sed 's/\/.*//')" >> $GITHUB_ENV
+    - name: Configure Docker
+      shell: bash
+      run: |
+        gcloud auth configure-docker ${{ env.DOCKER_REGISTRY }}
+    # Get the head commit of the PR that introduced this commit. This is the
+    # tag that should have been added to the docker image when it was built
+    # and pushed
+    - name: Get docker tag
+      uses: actions/github-script@v5
+      id: fetch-sha
+      with:
+        script: |
+          const result = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            commit_sha: ${{ context.sha }}
+          });
+          const prs = result.data.filter((pr) => pr.merged === true)
+          if (prs.length !== 1) {
+            throw new Error(`Exactly one merged PR introducing this commit was expected. Found ${prs.length}`)
+          }
+          const sha = prs[0].head.sha
+          return sha
+    - name: Pull
+      shell: bash
+      run: |
+        docker pull ${{ env.DOCKER_REPO }}/${{ inputs.image_name }}:${{ steps.fetch-sha.outputs.sha}}
+    - name: Tag and push
+      shell: bash
+      run: |
+        registry=$(echo -n ${{ inputs.BASE64_DOCKER_REGISTRY }} | base64 -d)
+        docker tag ${registry}/${{ inputs.image_name }}:${{ steps.fetch-sha.outputs.result}} ${registry}/${{ inputs.image_name }}:${{ inputs.environment }}
+        docker push ${registry}/${{ inputs.image_name }}:${{ inputs.environment }}
