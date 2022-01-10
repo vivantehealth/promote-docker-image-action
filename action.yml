@@ -1,8 +1,9 @@
 name: 'The named action'
 description: "Does a useful thing"
 inputs:
-  environment:
+  tag:
     required: true
+    description: New tag to apply to image
     type: string
   image_name:
     description: "Name of the docker image. Image will be available in the registry at a location such as 'us-docker.pkg.dev/build-artifacts-tools-b6f1/<repo-name>/<image_name>:<git_sha>'."
