@@ -49,7 +49,7 @@ runs:
           const result = await github.rest.repos.listPullRequestsAssociatedWithCommit({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            commit_sha: ${{ context.sha }}
+            commit_sha:  context.sha
           });
           const prs = result.data.filter((pr) => pr.merged === true)
           if (prs.length !== 1) {
