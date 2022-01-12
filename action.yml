@@ -51,7 +51,7 @@ runs:
             repo: context.repo.repo,
             commit_sha:  context.sha
           });
-          const prs = result.data.filter((pr) => pr.merged === true)
+          const prs = result.data.filter((pr) => pr.merged_at !== null && pr.merged_at !== "")
           if (prs.length !== 1) {
             throw new Error(`Exactly one merged PR introducing this commit was expected. Found ${prs.length}`)
           }

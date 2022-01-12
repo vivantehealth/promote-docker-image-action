@@ -7,6 +7,9 @@ This action retags an image with an environment tag, effectively promoting it to
 Suggested use:
 
 ```yaml
+permissions:
+  contents: read
+  pull-requests: read
 jobs:
   run:
     name: Run
