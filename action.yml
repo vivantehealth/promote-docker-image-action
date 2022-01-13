@@ -60,7 +60,7 @@ runs:
     - name: Pull
       shell: bash
       run: |
-        docker pull ${{ env.DOCKER_REPO }}/${{ inputs.image_name }}:${{ steps.fetch-sha.outputs.result}}
+        docker pull ${{ env.DOCKER_REPO }}/${{ inputs.image_name }}:$(echo -n ${{ steps.fetch-sha.outputs.result}})
     - name: Tag and push
       shell: bash
       run: |
