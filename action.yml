@@ -53,7 +53,7 @@ runs:
           });
           const prs = result.data.filter((pr) => pr.merged_at !== null && pr.merged_at !== "")
           if (prs.length !== 1) {
-            throw new Error(`Exactly one merged PR introducing this commit was expected. Found ${prs.length}`)
+            throw new Error(`Expected exactly one merged PR introducing this commit. Found ${prs.length}`)
           }
           const sha = prs[0].head.sha
           return sha
