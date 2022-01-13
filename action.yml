@@ -57,13 +57,18 @@ runs:
           }
           const sha = prs[0].head.sha
           return sha
+    - name: Set source image tag
+      shell: bash
+      run: |
+        # There are extra quotes around the output from the fetch-sha step. remove them and set as an env var for subsequent steps
+        echo "SOURCE_TAG=$(echo -n ${{ steps.fetch-sha.outputs.result}})"
     - name: Pull
       shell: bash
       run: |
-        docker pull ${{ env.DOCKER_REPO }}/${{ inputs.image_name }}:$(echo -n ${{ steps.fetch-sha.outputs.result}})
+        docker pull ${{ env.DOCKER_REPO }}/${{ inputs.image_name }}:${{ env.SOURCE_TAG }}
     - name: Tag and push
       shell: bash
       run: |
         registry=$(echo -n ${{ inputs.BASE64_DOCKER_REGISTRY }} | base64 -d)
-        docker tag ${registry}/${{ inputs.image_name }}:${{ steps.fetch-sha.outputs.result}} ${registry}/${{ inputs.image_name }}:${{ inputs.environment }}
-        docker push ${registry}/${{ inputs.image_name }}:${{ inputs.environment }}
+        docker tag ${registry}/${{ inputs.image_name }}:${{ env.SOURCE_TAG }} ${registry}/${{ inputs.image_name }}:${{ inputs.tag }}
+        docker push ${registry}/${{ inputs.image_name }}:${{ inputs.tag }}
