@@ -33,7 +33,7 @@ runs:
       run: |
         repo=$(echo -n ${{ inputs.BASE64_DOCKER_REGISTRY }} | base64 -d)
         echo "DOCKER_REPO=$repo" >> $GITHUB_ENV
-        echo "DOCKER_REGISTRY=$(echo -n ${DOCKER_REPO} | sed 's/\/.*//')" >> $GITHUB_ENV
+        echo "DOCKER_REGISTRY=$(echo -n ${repo} | sed 's/\/.*//')" >> $GITHUB_ENV
     - name: Configure Docker
       shell: bash
       run: |
