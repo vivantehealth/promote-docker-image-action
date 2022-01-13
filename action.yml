@@ -60,8 +60,9 @@ runs:
     - name: Set source image tag
       shell: bash
       run: |
-        # There are extra quotes around the output from the fetch-sha step. remove them and set as an env var for subsequent steps
-        echo "SOURCE_TAG=$(echo -n ${{ steps.fetch-sha.outputs.result}})"
+        echo "SOURCE_TAG=$(echo -n ${{ steps.fetch-sha.outputs.result}})" >> $GITHUB_ENV
+        # There are extra quotes around the output from the fetch-sha step.
+        # This should remove them and set as an env var for subsequent steps
     - name: Pull
       shell: bash
       run: |
