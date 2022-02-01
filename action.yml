@@ -1,10 +1,15 @@
-name: 'The named action'
-description: "Does a useful thing"
+name: 'Promote docker image'
+description: "Adds current branch tag and specified environment tag to a docker image. Determines source tag by examining PR that introduced the current commit."
 inputs:
   tag:
     required: true
     description: New tag to apply to image
     type: string
+  add_ref_tag:
+    required: false
+    description: Whether to apply a docker tag based on the current branch or github tag
+    type: boolean
+    default: true
   image_name:
     description: "Name of the docker image. Image will be available in the registry at a location such as 'us-docker.pkg.dev/build-artifacts-tools-b6f1/<repo-name>/<image_name>:<git_sha>'."
     type: string
@@ -73,3 +78,5 @@ runs:
         registry=$(echo -n ${{ inputs.BASE64_DOCKER_REGISTRY }} | base64 -d)
         docker tag ${registry}/${{ inputs.image_name }}:${{ env.SOURCE_TAG }} ${registry}/${{ inputs.image_name }}:${{ inputs.tag }}
         docker push ${registry}/${{ inputs.image_name }}:${{ inputs.tag }}
+        docker tag ${registry}/${{ inputs.image_name }}:${{ env.SOURCE_TAG }} ${registry}/${{ inputs.image_name }}:${{ github.ref_name }}
+        docker push ${registry}/${{ inputs.image_name }}:${{ github.ref_name }}
