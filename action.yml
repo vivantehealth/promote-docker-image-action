@@ -78,5 +78,9 @@ runs:
         registry=$(echo -n ${{ inputs.BASE64_DOCKER_REGISTRY }} | base64 -d)
         docker tag ${registry}/${{ inputs.image_name }}:${{ env.SOURCE_TAG }} ${registry}/${{ inputs.image_name }}:${{ inputs.tag }}
         docker push ${registry}/${{ inputs.image_name }}:${{ inputs.tag }}
+    - name: Add ref tag
+      if: ${{ github.event.inputs.add_ref_tag == 'true' }}
+      shell: bash
+      run: |
         docker tag ${registry}/${{ inputs.image_name }}:${{ env.SOURCE_TAG }} ${registry}/${{ inputs.image_name }}:${{ github.ref_name }}
         docker push ${registry}/${{ inputs.image_name }}:${{ github.ref_name }}
