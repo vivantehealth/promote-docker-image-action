@@ -24,6 +24,10 @@ inputs:
   base64_docker_registry:
     type: string
     required: true
+outputs:
+  unique_docker_tag:
+    description: Docker tag of the image that got promoted. This is used when the stack also contains a consumer of this image. For example, when terraform deploys cloud run using the image promoted here, it should specify a unique tag, rather than an environment tag, in order to deploy atomicly.
+    value: ${{ steps.fetch-sha.outputs.result }}
 
 runs:
   using: "composite"
