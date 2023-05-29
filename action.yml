@@ -30,7 +30,7 @@ runs:
   using: "composite"
   steps:
     - name: Set up gcloud
-      uses: vivantehealth/gcloud-workload-identity-action@v2
+      uses: vivantehealth/gcloud-workload-identity-action@v3
       with:
         base64_workload_identity_provider: ${{ inputs.BASE64_WORKLOAD_IDENTITY_PROVIDER }}
         base64_gcp_service_account: ${{ inputs.BASE64_GCP_SERVICE_ACCOUNT }}
