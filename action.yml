@@ -12,13 +12,13 @@ inputs:
     description: "Name of the docker image. Image will be available in the registry at a location such as 'us-docker.pkg.dev/build-artifacts-tools-b6f1/<repo-name>/<image_name>:<git_sha>'."
     required: false
     default: image
-  base64_workload_identity_provider:
+  workload_identity_provider:
     description: "Google CLoud Workload Identity Provider"
     required: true
-  base64_gcp_service_account:
+  gcp_service_account:
     description: "Google Service Account"
     required: true
-  base64_docker_registry:
+  docker_registry:
     description: "Docker registry URI"
     required: true
 outputs:
@@ -30,15 +30,15 @@ runs:
   using: "composite"
   steps:
     - name: Set up gcloud
-      uses: vivantehealth/gcloud-workload-identity-action@v2
+      uses: vivantehealth/gcloud-workload-identity-action@v3
       with:
-        base64_workload_identity_provider: ${{ inputs.BASE64_WORKLOAD_IDENTITY_PROVIDER }}
-        base64_gcp_service_account: ${{ inputs.BASE64_GCP_SERVICE_ACCOUNT }}
+        workload_identity_provider: ${{ inputs.WORKLOAD_IDENTITY_PROVIDER }}
+        gcp_service_account: ${{ inputs.GCP_SERVICE_ACCOUNT }}
     - name: Parse docker registry/repo
       shell: bash
       run: |
-        repo=$(echo -n ${{ inputs.BASE64_DOCKER_REGISTRY }} | base64 -d)
-        echo "DOCKER_REPO=$repo" >> $GITHUB_ENV
+        repo=$(echo -n ${{ inputs.DOCKER_REGISTRY }})
+        echo "DOCKER_REPO=${repo}" >> $GITHUB_ENV
         echo "DOCKER_REGISTRY=$(echo -n ${repo} | sed 's/\/.*//')" >> $GITHUB_ENV
     - name: Configure Docker
       shell: bash
@@ -76,9 +76,9 @@ runs:
     - name: Tag and push
       shell: bash
       run: |
-        registry=$(echo -n ${{ inputs.BASE64_DOCKER_REGISTRY }} | base64 -d)
-        docker tag ${registry}/${{ inputs.image_name }}:${{ env.SOURCE_TAG }} ${registry}/${{ inputs.image_name }}:${{ inputs.tag }}
-        docker push ${registry}/${{ inputs.image_name }}:${{ inputs.tag }}
+        registry=$(echo -n ${{ inputs.DOCKER_REGISTRY }})
+        docker tag "${registry}/${{ inputs.image_name }}:${{ env.SOURCE_TAG }}" "${registry}/${{ inputs.image_name }}:${{ inputs.tag }}"
+        docker push "${registry}/${{ inputs.image_name }}:${{ inputs.tag }}"
     - name: Add ref tag
       if: ${{ github.event.inputs.add_ref_tag == 'true' }}
       shell: bash
