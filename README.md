@@ -1,4 +1,4 @@
-# repo-name
+# promote-docker-image-action
 
 To make this action available to other repos, it needs to be `internal` visibility, and "Accessible from repositories in the 'vivantehealth' organization" set in [Settings->Actions](https://github.com/vivantehealth/terraform-plan-action/settings/actions)
 
@@ -16,11 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run action
-        uses: vivantehealth/promote-docker-image-action@v0
+        uses: vivantehealth/promote-docker-image-action@v1
         with:
           environment: int
           image_name: image #default
-          base64_workload_identity_provider: <provider-name>
-          base64_gcp_service_account: <sa-email>
-          base64_docker_registry: <docker-registry-or-repo>
+          workload_identity_provider: vars.WORKLOAD_IDENTITY_PROVIDER
+          gcp_service_account: vars.GCP_SERVICE_ACCOUNT
+          docker_registry: vars.DOCKER_REGISTRY
 ```
