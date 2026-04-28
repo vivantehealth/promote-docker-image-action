@@ -48,7 +48,7 @@ runs:
     # tag that should have been added to the docker image when it was built
     # and pushed
     - name: Get docker tag
-      uses: actions/github-script@v8
+      uses: actions/github-script@v9
       id: fetch-sha
       with:
         script: |
